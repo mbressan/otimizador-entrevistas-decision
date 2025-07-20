@@ -57,13 +57,28 @@ Sistema completo de otimização de entrevistas que utiliza Machine Learning par
 ### 1. Clone o Repositório
 
 ```bash
-git clone <repository-url>
-cd otimizador-entrevistas
+git clone https://github.com/mbressan/otimizador-entrevistas-decision.git
+cd otimizador-entrevistas-decision
+
+# Baixar arquivos de dados via Git LFS
+git lfs pull
 ```
+
+**📊 Sobre os Dados de Treinamento:**
+- Os arquivos de dados (253MB) são gerenciados via **Git LFS**
+- São baixados automaticamente com `git lfs pull`
+- Contêm dados sintéticos para treinamento do modelo ML
+- Para estratégias alternativas, consulte `DATA_MANAGEMENT.md`
 
 ### 2. Executar com Docker
 
-#### Stack Completa (Recomendado)
+#### Deploy Automatizado (Recomendado)
+```bash
+# Script automatizado que verifica dados, constrói e executa
+./scripts/deploy.sh
+```
+
+#### Stack Completa (Manual)
 ```bash
 # Executar toda a stack (PostgreSQL + App + Prometheus + Grafana)
 docker-compose up --build
@@ -119,7 +134,35 @@ Após a execução com `docker-compose up`:
   - Usuário: `admin`
   - Senha: `admin123`
 
-## 🗄️ Inicialização Automática do Banco de Dados
+## � Gestão de Dados de Treinamento
+
+### Arquivos de Dados (253MB total)
+- **`data/applicants.json`** (195MB) - Perfis dos candidatos
+- **`data/vagas.json`** (37MB) - Informações das vagas  
+- **`data/prospects.json`** (21MB) - Histórico de candidaturas
+
+### 🔧 Git LFS (Large File Storage)
+Os dados são gerenciados via Git LFS para otimizar o repositório:
+
+```bash
+# Verificar status dos arquivos LFS
+git lfs ls-files
+
+# Forçar download dos dados
+git lfs pull
+
+# Verificar integridade
+ls -lh data/
+```
+
+### 🚀 Deploy sem Git LFS
+Se Git LFS não estiver disponível, consulte estratégias alternativas em `DATA_MANAGEMENT.md`:
+- Download via script automatizado
+- Armazenamento em nuvem (S3, GCS, Azure)
+- Volumes Docker externos
+- CI/CD com storage externo
+
+## �🗄️ Inicialização Automática do Banco de Dados
 
 ### Processo Automático
 A aplicação possui **inicialização automática do PostgreSQL** que é executada durante o startup:

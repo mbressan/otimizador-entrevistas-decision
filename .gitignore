@@ -174,11 +174,8 @@ Desktop.ini
 .dockerignore
 
 # Project specific
-# Arquivos de dados (não versionar dados sensíveis)
-# Dados sensíveis (não incluir dados reais no repositório)
-data/applicants.json
-data/vagas.json
-data/prospects.json
+# Dados sensíveis (não incluir dados reais no repositório em projetos com dados reais)
+# Os arquivos em data/ são rastreados via Git LFS
 app/data/applicants.json
 app/data/vagas.json
 app/data/prospects.json
