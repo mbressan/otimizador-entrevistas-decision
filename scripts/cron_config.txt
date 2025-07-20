@@ -1,0 +1,21 @@
+# Configuração do cron para retreinamento automático do modelo ML
+# Para instalar: crontab -e e adicionar essas linhas
+
+# Verificação diária às 2:00 AM
+0 2 * * * /home/mateus/otimizador-entrevistas-decision/scripts/auto_retrain.sh
+
+# Verificação semanal intensiva aos domingos às 3:00 AM
+0 3 * * 0 /home/mateus/otimizador-entrevistas-decision/scripts/auto_retrain.sh
+
+# Instruções de instalação:
+# 1. Execute: crontab -e
+# 2. Adicione as linhas acima (sem os comentários)
+# 3. Salve e saia
+# 4. Verifique com: crontab -l
+
+# Para logs:
+# - Os logs são salvos em /var/log/model_retrain.log
+# - Para visualizar: tail -f /var/log/model_retrain.log
+
+# Para teste manual:
+# bash /home/mateus/otimizador-entrevistas-decision/scripts/auto_retrain.sh

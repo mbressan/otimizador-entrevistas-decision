@@ -15,15 +15,14 @@
       "combined_text"
     ]
   },
-  "total_features_after_transform": 826,
+  "total_features_after_transform": 65,
   "model_type": "RandomForestClassifier_Enhanced",
-  "training_date": "2025-07-19 22:16:35.924897",
-  "dataset_size": 45071,
-  "accuracy": 0.637283397306472,
-  "cross_validation_score": 0.5,
+  "training_date": "2025-07-20 09:56:49.640998",
+  "dataset_size": 161,
+  "accuracy": 0.7888198757763976,
   "class_distribution": {
-    "0": 42817,
-    "1": 2254
+    "0": 139,
+    "1": 22
   },
   "feature_engineering": [
     "tech_match_score: Score de compatibilidade técnica (0.0-1.0)",

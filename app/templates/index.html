@@ -3,348 +3,365 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Otimizador de Entrevistas - Dashboard</title>
+    <title>Otimizador de Entrevistas - Predição</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        .hero-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 60px 0;
-        }
-        .card {
-            transition: transform 0.2s ease-in-out;
-            border: none;
+        .result-card {
+            border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        .percentage-display {
+            font-size: 3rem;
+            font-weight: bold;
         }
-        .vaga-card {
-            margin-bottom: 20px;
-        }
-        .nivel-badge {
-            font-size: 0.8rem;
-        }
-        .stats-card {
-            background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+        .high-quality {
+            background: linear-gradient(135deg, #28a745, #20c997);
             color: white;
-            border-radius: 15px;
         }
-        .pagination .page-link {
-            border-radius: 50px;
-            margin: 0 2px;
-            border: none;
-            color: #667eea;
+        .low-quality {
+            background: linear-gradient(135deg, #dc3545, #fd7e14);
+            color: white;
         }
-        .pagination .page-item.active .page-link {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
+        .analysis-item {
+            border-left: 4px solid #007bff;
+            padding-left: 15px;
+            margin-bottom: 10px;
         }
-        .pagination .page-link:hover {
-            background-color: #f8f9fa;
-            color: #495057;
-        }
-        .search-section {
-            background-color: #f8f9fa;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 30px;
+        .loading {
+            display: none;
         }
     </style>
 </head>
-<body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<body class="bg-light">
+    <nav class="navbar navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('index') }}">
-                <i class="fas fa-users-cog me-2"></i>
-                Otimizador de Entrevistas
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="{{ url_for('index') }}">
-                            <i class="fas fa-home me-1"></i>Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('status_page') }}">
-                            <i class="fas fa-heartbeat me-1"></i>Status
-                        </a>
-                    </li>
-                </ul>
+            <span class="navbar-brand mb-0 h1">🎯 Otimizador de Entrevistas</span>
+            <div class="navbar-nav">
+                <a class="nav-link" href="/status">Status</a>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-8">
-                    <h1 class="display-4 fw-bold mb-4">
-                        <i class="fas fa-brain me-3"></i>
-                        Otimização de Entrevistas com IA
-                    </h1>
-                    <p class="lead mb-4">
-                        Sistema inteligente para identificar os candidatos mais compatíveis com suas vagas, 
-                        utilizando Machine Learning para otimizar o processo de recrutamento.
-                    </p>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">📄 Informações da Vaga</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="predictionForm">
+                            <div class="mb-3">
+                                <label for="titulo_vaga" class="form-label">Título da Vaga *</label>
+                                <input type="text" class="form-control" id="titulo_vaga" name="titulo_vaga" required
+                                       placeholder="Ex: Desenvolvedor Python Sênior">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="competencias_tecnicas" class="form-label">Competências Técnicas Requeridas *</label>
+                                <textarea class="form-control" id="competencias_tecnicas" name="competencias_tecnicas" rows="3" required
+                                          placeholder="Ex: Python, Django, FastAPI, PostgreSQL, Docker, AWS"></textarea>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="nivel_academico_vaga" class="form-label">Nível Acadêmico</label>
+                                        <select class="form-select" id="nivel_academico_vaga" name="nivel_academico">
+                                            <option value="">Selecione...</option>
+                                            <option value="médio">Ensino Médio</option>
+                                            <option value="técnico">Técnico</option>
+                                            <option value="superior">Superior</option>
+                                            <option value="pós">Pós-graduação</option>
+                                            <option value="mestrado">Mestrado</option>
+                                            <option value="doutorado">Doutorado</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="nivel_ingles_vaga" class="form-label">Nível de Inglês</label>
+                                        <select class="form-select" id="nivel_ingles_vaga" name="nivel_ingles">
+                                            <option value="">Selecione...</option>
+                                            <option value="básico">Básico</option>
+                                            <option value="intermediário">Intermediário</option>
+                                            <option value="avançado">Avançado</option>
+                                            <option value="fluente">Fluente</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="nivel_profissional" class="form-label">Nível Profissional</label>
+                                        <select class="form-select" id="nivel_profissional" name="nivel_profissional">
+                                            <option value="">Selecione...</option>
+                                            <option value="júnior">Júnior</option>
+                                            <option value="pleno">Pleno</option>
+                                            <option value="sênior">Sênior</option>
+                                            <option value="especialista">Especialista</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="tipo_contratacao" class="form-label">Tipo de Contratação</label>
+                                        <select class="form-select" id="tipo_contratacao" name="tipo_contratacao">
+                                            <option value="">Selecione...</option>
+                                            <option value="clt">CLT</option>
+                                            <option value="pj">PJ</option>
+                                            <option value="temporário">Temporário</option>
+                                            <option value="estágio">Estágio</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="areas_atuacao" class="form-label">Áreas de Atuação</label>
+                                <input type="text" class="form-control" id="areas_atuacao" name="areas_atuacao"
+                                       placeholder="Ex: Tecnologia, TI, Desenvolvimento">
+                            </div>
+                    </div>
                 </div>
-                <div class="col-lg-4 text-center">
-                    <div class="stats-card p-4">
-                        <h3 class="fw-bold">{{ pagination.total_vagas if pagination else vagas|length }}</h3>
-                        <p class="mb-1">Vagas com Prospects</p>
-                        {% if pagination %}
-                        <small class="opacity-75">Página {{ pagination.current_page }} de {{ pagination.total_pages }}</small>
-                        {% endif %}
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">👤 Dados do Candidato</h5>
+                    </div>
+                    <div class="card-body">
+                            <div class="mb-3">
+                                <label for="conhecimentos_tecnicos" class="form-label">Conhecimentos Técnicos *</label>
+                                <textarea class="form-control" id="conhecimentos_tecnicos" name="conhecimentos_tecnicos" rows="3" required
+                                          placeholder="Ex: Python, JavaScript, React, Node.js, MongoDB"></textarea>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="nivel_academico_candidato" class="form-label">Nível Acadêmico</label>
+                                        <select class="form-select" id="nivel_academico_candidato" name="nivel_academico_candidato">
+                                            <option value="">Selecione...</option>
+                                            <option value="médio">Ensino Médio</option>
+                                            <option value="técnico">Técnico</option>
+                                            <option value="superior">Superior</option>
+                                            <option value="pós">Pós-graduação</option>
+                                            <option value="mestrado">Mestrado</option>
+                                            <option value="doutorado">Doutorado</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="nivel_ingles_candidato" class="form-label">Nível de Inglês</label>
+                                        <select class="form-select" id="nivel_ingles_candidato" name="nivel_ingles_candidato">
+                                            <option value="">Selecione...</option>
+                                            <option value="básico">Básico</option>
+                                            <option value="intermediário">Intermediário</option>
+                                            <option value="avançado">Avançado</option>
+                                            <option value="fluente">Fluente</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="area_atuacao_candidato" class="form-label">Área de Atuação *</label>
+                                <input type="text" class="form-control" id="area_atuacao_candidato" name="area_atuacao_candidato" required
+                                       placeholder="Ex: Desenvolvimento de Software, TI, Tecnologia">
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" id="submitButton" class="btn btn-primary btn-lg">
+                                    <span class="spinner-border spinner-border-sm me-2 loading" role="status" style="display: none;"></span>
+                                    🎯 Analisar Compatibilidade
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
 
-    <!-- Main Content -->
-    <div class="container my-5">
-        <div class="row">
+        <!-- Resultado da Predição -->
+        <div class="row mt-4" id="resultSection" style="display: none;">
             <div class="col-12">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2 class="fw-bold">
-                        <i class="fas fa-briefcase me-2 text-primary"></i>
-                        Vagas com Prospects
-                        {% if pagination %}
-                        <small class="text-muted">({{ pagination.total_vagas }} encontradas)</small>
-                        {% endif %}
-                    </h2>
-                </div>
-                
-                <!-- Filtros de Busca -->
-                <div class="search-section">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <form method="GET" id="searchForm">
-                                <div class="input-group">
-                                    <input type="text" name="search" id="searchInput" class="form-control" 
-                                           placeholder="Buscar por título, cliente ou área..." 
-                                           value="{{ search if search else '' }}">
-                                    <button class="btn btn-primary" type="submit">
-                                        <i class="fas fa-search"></i>
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                        <div class="col-md-3">
-                            <form method="GET" id="filterForm">
-                                <input type="hidden" name="search" value="{{ search if search else '' }}">
-                                <select name="nivel" id="filterNivel" class="form-select">
-                                    <option value="">Todos os níveis</option>
-                                    {% for nivel in niveis_disponiveis %}
-                                    <option value="{{ nivel }}" {% if nivel_filter == nivel %}selected{% endif %}>
-                                        {{ nivel|title }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                            </form>
-                        </div>
-                        <div class="col-md-3">
-                            {% if search or nivel_filter %}
-                            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary w-100">
-                                <i class="fas fa-times me-2"></i>Limpar Filtros
-                            </a>
-                            {% endif %}
-                        </div>
+                <div class="card result-card" id="resultCard">
+                    <div class="card-header text-white">
+                        <h4 class="mb-0">📊 Resultado da Análise</h4>
                     </div>
-                </div>
-
-                <!-- Vagas Grid -->
-                <div class="row" id="vagasContainer">
-                    {% for vaga in vagas %}
-                    <div class="col-lg-6 col-xl-4 vaga-item" 
-                         data-titulo="{{ vaga.titulo_vaga|lower }}" 
-                         data-cliente="{{ vaga.cliente|lower }}"
-                         data-nivel="{{ vaga.nivel_profissional|lower }}">
-                        <div class="card vaga-card h-100">
-                            <div class="card-header bg-primary text-white">
-                                <h5 class="card-title mb-0">
-                                    <i class="fas fa-laptop-code me-2"></i>
-                                    {{ vaga.titulo_vaga[:50] }}{% if vaga.titulo_vaga|length > 50 %}...{% endif %}
-                                </h5>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 text-center">
+                                <div class="percentage-display" id="percentageDisplay">---%</div>
+                                <h5 id="qualityText">Calculando...</h5>
                             </div>
-                            <div class="card-body">
-                                <div class="mb-3">
-                                    <span class="badge bg-info nivel-badge">
-                                        <i class="fas fa-layer-group me-1"></i>
-                                        {{ vaga.nivel_profissional or 'Não informado' }}
-                                    </span>
-                                    {% if vaga.cidade %}
-                                    <span class="badge bg-secondary nivel-badge ms-2">
-                                        <i class="fas fa-map-marker-alt me-1"></i>
-                                        {{ vaga.cidade }}
-                                    </span>
-                                    {% endif %}
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <small class="text-muted">
-                                        <i class="fas fa-building me-1"></i>
-                                        <strong>Cliente:</strong> {{ vaga.cliente[:40] }}{% if vaga.cliente|length > 40 %}...{% endif %}
-                                    </small>
-                                </div>
-                                
-                                {% if vaga.areas_atuacao %}
-                                <div class="mb-3">
-                                    <small class="text-muted">
-                                        <i class="fas fa-tags me-1"></i>
-                                        <strong>Área:</strong> {{ vaga.areas_atuacao[:50] }}{% if vaga.areas_atuacao|length > 50 %}...{% endif %}
-                                    </small>
-                                </div>
-                                {% endif %}
-                            </div>
-                            <div class="card-footer bg-light">
-                                <a href="{{ url_for('vaga_detalhes', id_vaga=vaga.id_vaga) }}" 
-                                   class="btn btn-primary btn-sm w-100">
-                                    <i class="fas fa-search me-2"></i>
-                                    Ver Candidatos Compatíveis
-                                </a>
+                            <div class="col-md-8">
+                                <h6>📈 Análise Detalhada:</h6>
+                                <div id="analysisDetails"></div>
                             </div>
                         </div>
                     </div>
-                    {% endfor %}
                 </div>
-
-                <!-- Paginação -->
-                {% if pagination and pagination.total_pages > 1 %}
-                <nav aria-label="Navegação de páginas" class="mt-4">
-                    <ul class="pagination justify-content-center">
-                        <!-- Primeira página -->
-                        {% if pagination.has_prev %}
-                        <li class="page-item">
-                            <a class="page-link" href="{{ url_for('index', page=1, search=search, nivel=nivel_filter) }}">
-                                <i class="fas fa-angle-double-left"></i>
-                            </a>
-                        </li>
-                        <!-- Página anterior -->
-                        <li class="page-item">
-                            <a class="page-link" href="{{ url_for('index', page=pagination.prev_page, search=search, nivel=nivel_filter) }}">
-                                <i class="fas fa-angle-left"></i>
-                            </a>
-                        </li>
-                        {% else %}
-                        <li class="page-item disabled">
-                            <span class="page-link"><i class="fas fa-angle-double-left"></i></span>
-                        </li>
-                        <li class="page-item disabled">
-                            <span class="page-link"><i class="fas fa-angle-left"></i></span>
-                        </li>
-                        {% endif %}
-
-                        <!-- Números das páginas -->
-                        {% for page_num in pagination.pages %}
-                        {% if page_num == pagination.current_page %}
-                        <li class="page-item active">
-                            <span class="page-link">{{ page_num }}</span>
-                        </li>
-                        {% else %}
-                        <li class="page-item">
-                            <a class="page-link" href="{{ url_for('index', page=page_num, search=search, nivel=nivel_filter) }}">
-                                {{ page_num }}
-                            </a>
-                        </li>
-                        {% endif %}
-                        {% endfor %}
-
-                        <!-- Próxima página -->
-                        {% if pagination.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="{{ url_for('index', page=pagination.next_page, search=search, nivel=nivel_filter) }}">
-                                <i class="fas fa-angle-right"></i>
-                            </a>
-                        </li>
-                        <!-- Última página -->
-                        <li class="page-item">
-                            <a class="page-link" href="{{ url_for('index', page=pagination.total_pages, search=search, nivel=nivel_filter) }}">
-                                <i class="fas fa-angle-double-right"></i>
-                            </a>
-                        </li>
-                        {% else %}
-                        <li class="page-item disabled">
-                            <span class="page-link"><i class="fas fa-angle-right"></i></span>
-                        </li>
-                        <li class="page-item disabled">
-                            <span class="page-link"><i class="fas fa-angle-double-right"></i></span>
-                        </li>
-                        {% endif %}
-                    </ul>
-                    
-                    <!-- Informações de paginação -->
-                    <div class="text-center mt-3">
-                        <small class="text-muted">
-                            Mostrando {{ ((pagination.current_page - 1) * pagination.per_page + 1) }} 
-                            a {{ (pagination.current_page * pagination.per_page) if (pagination.current_page * pagination.per_page) <= pagination.total_vagas else pagination.total_vagas }} 
-                            de {{ pagination.total_vagas }} vagas
-                        </small>
-                    </div>
-                </nav>
-                {% endif %}
-
-                {% if not vagas %}
-                <div class="text-center py-5">
-                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                    <h4 class="text-muted">Nenhuma vaga encontrada</h4>
-                    <p class="text-muted">Não há vagas disponíveis no momento.</p>
-                </div>
-                {% endif %}
             </div>
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="bg-dark text-white py-4 mt-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h5><i class="fas fa-users-cog me-2"></i>Otimizador de Entrevistas</h5>
-                    <p class="mb-0">Sistema inteligente de recrutamento com IA</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <p class="mb-0">
-                        <i class="fas fa-code me-2"></i>
-                        Desenvolvido por Mateus Bressan
-                    </p>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Melhorar UX da busca
-        document.getElementById('searchInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                document.getElementById('searchForm').submit();
+        // Verificar se o DOM está carregado
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, setting up form listener...');
+            
+            var form = document.getElementById('predictionForm');
+            if (!form) {
+                console.error('Form not found!');
+                return;
             }
-        });
-
-        // Auto-submit do filtro de nível
-        document.getElementById('filterNivel').addEventListener('change', function() {
-            document.getElementById('filterForm').submit();
-        });
-
-        // Smooth scroll para âncoras
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
+            
+            form.addEventListener('submit', function(e) {
                 e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
+                console.log('Form submitted!');
+                
+                // Tentar encontrar o botão de várias formas
+                var submitBtn = form.querySelector('button[type="submit"]') || 
+                               document.querySelector('button[type="submit"]') ||
+                               document.getElementById('submitButton');
+                
+                console.log('Submit button found:', submitBtn);
+                
+                if (!submitBtn) {
+                    console.error('Submit button not found! Continuing without loading animation...');
+                }
+                
+                var loading = null;
+                if (submitBtn) {
+                    loading = submitBtn.querySelector('.loading');
+                    if (loading) {
+                        loading.style.display = 'inline-block';
+                    }
+                    submitBtn.disabled = true;
+                }
+                
+                // Coletar dados do formulário
+                var formData = new FormData(form);
+                var data = {
+                    vaga: {
+                        titulo_vaga: formData.get('titulo_vaga') || '',
+                        competencias_tecnicas_requeridas: formData.get('competencias_tecnicas') || '',
+                        nivel_academico: formData.get('nivel_academico') || '',
+                        nivel_ingles: formData.get('nivel_ingles') || '',
+                        nivel_profissional: formData.get('nivel_profissional') || '',
+                        tipo_contratacao: formData.get('tipo_contratacao') || '',
+                        areas_atuacao: formData.get('areas_atuacao') || ''
+                    },
+                    candidato: {
+                        conhecimentos_tecnicos: formData.get('conhecimentos_tecnicos') || '',
+                        nivel_academico: formData.get('nivel_academico_candidato') || '',
+                        nivel_ingles: formData.get('nivel_ingles_candidato') || '',
+                        area_de_atuacao: formData.get('area_atuacao_candidato') || ''
+                    }
+                };
+                
+                console.log('Data to send:', data);
+                
+                // Fazer requisição
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '/api/predict_simple', true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4) {
+                        // Esconder loading
+                        if (loading) {
+                            loading.style.display = 'none';
+                        }
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                        }
+                        
+                        if (xhr.status === 200) {
+                            try {
+                                var result = JSON.parse(xhr.responseText);
+                                console.log('API Response:', result);
+                                displayResult(result);
+                            } catch (e) {
+                                console.error('Parse error:', e);
+                                alert('Erro ao processar resposta do servidor');
+                            }
+                        } else {
+                            console.error('HTTP Error:', xhr.status, xhr.responseText);
+                            alert('Erro na comunicação: ' + xhr.status);
+                        }
+                    }
+                };
+                
+                xhr.onerror = function() {
+                    console.error('Network error');
+                    if (loading) {
+                        loading.style.display = 'none';
+                    }
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                    }
+                    alert('Erro de conexão');
+                };
+                
+                xhr.send(JSON.stringify(data));
             });
         });
+        
+        function displayResult(result) {
+            console.log('Displaying result:', result);
+            
+            var resultSection = document.getElementById('resultSection');
+            var resultCard = document.getElementById('resultCard');
+            var percentageDisplay = document.getElementById('percentageDisplay');
+            var qualityText = document.getElementById('qualityText');
+            var analysisDetails = document.getElementById('analysisDetails');
+            
+            if (!resultSection) {
+                console.error('resultSection not found!');
+                alert('Erro: Seção de resultado não encontrada');
+                return;
+            }
+            
+            // Mostrar seção de resultado
+            resultSection.style.display = 'block';
+            
+            // Configurar cor do card
+            var isHighQuality = result.prediction === 1;
+            if (resultCard) {
+                resultCard.className = 'card result-card ' + (isHighQuality ? 'high-quality' : 'low-quality');
+            }
+            
+            // Mostrar porcentagem
+            if (percentageDisplay) {
+                percentageDisplay.textContent = result.percentage || '0%';
+            }
+            if (qualityText) {
+                qualityText.textContent = result.prediction_text || 'Resultado';
+            }
+            
+            // Mostrar análise detalhada
+            if (analysisDetails && result.analysis) {
+                var analysis = result.analysis;
+                analysisDetails.innerHTML = 
+                    '<div class="analysis-item"><strong>💻 Compatibilidade Técnica:</strong> ' + (analysis.tech_compatibility || 'N/A') + '</div>' +
+                    '<div class="analysis-item"><strong>🎓 Compatibilidade Acadêmica:</strong> ' + (analysis.academic_compatibility || 'N/A') + '</div>' +
+                    '<div class="analysis-item"><strong>🌐 Compatibilidade de Inglês:</strong> ' + (analysis.english_compatibility || 'N/A') + '</div>' +
+                    '<div class="analysis-item"><strong>🏢 Área de Atuação:</strong> ' + (analysis.area_match || 'N/A') + '</div>' +
+                    '<div class="analysis-item"><strong>📋 Tipo de Contrato:</strong> ' + (analysis.contract_type || 'N/A') + '</div>';
+            }
+            
+            // Scroll para o resultado
+            resultSection.scrollIntoView({ behavior: 'smooth' });
+            console.log('Result displayed successfully!');
+        }
     </script>
 </body>
 </html>

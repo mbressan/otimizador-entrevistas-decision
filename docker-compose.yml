@@ -37,6 +37,7 @@ services:
       - DB_PORT=5432
     volumes:
       - ./app/models:/app/models:ro
+      - ./data:/app/data:ro
     depends_on:
       postgresql:
         condition: service_healthy

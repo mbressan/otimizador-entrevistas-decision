@@ -1,0 +1,20 @@
+{
+  "model_type": "RandomForestClassifier_CandidatosContratados",
+  "target": "high_quality_hire",
+  "features": [
+    "tech_success_score",
+    "academic_success_score",
+    "english_success_score",
+    "nivel_profissional",
+    "areas_atuacao",
+    "area_atuacao_candidato",
+    "is_clt",
+    "is_pj",
+    "is_tech_area",
+    "combined_text"
+  ],
+  "accuracy": 0.991472572228586,
+  "n_samples": 7857,
+  "trained_date": "2025-07-20T10:31:37.826613",
+  "description": "Modelo treinado apenas com candidatos contratados para identificar padrões de sucesso"
+}
