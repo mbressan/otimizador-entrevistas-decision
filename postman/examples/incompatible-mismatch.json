@@ -1,0 +1,21 @@
+{
+  "description": "Cenário Incompatível - Candidato de área diferente sem competências técnicas adequadas",
+  "expected_result": "Baixa qualidade (prediction 0, quality_score baixo)",
+  "request_body": {
+    "vaga": {
+      "titulo_vaga": "Desenvolvedor Full Stack Sênior",
+      "competencias_tecnicas_requeridas": "React, Node.js, Python, Docker, Kubernetes, AWS, PostgreSQL",
+      "nivel_academico": "superior",
+      "nivel_ingles": "intermediário",
+      "nivel_profissional": "sênior",
+      "tipo_contratacao": "clt",
+      "areas_atuacao": "Tecnologia"
+    },
+    "candidato": {
+      "conhecimentos_tecnicos": "Vendas, Marketing Digital, Excel, PowerPoint",
+      "nivel_academico": "ensino médio",
+      "nivel_ingles": "básico",
+      "area_de_atuacao": "Vendas e Marketing"
+    }
+  }
+}

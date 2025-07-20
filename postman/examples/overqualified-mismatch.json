@@ -1,0 +1,21 @@
+{
+  "description": "Cenário Mismatch - Candidato especialista para vaga básica (super qualificado)",
+  "expected_result": "Qualidade variável (pode ser baixa por over-qualification)",
+  "request_body": {
+    "vaga": {
+      "titulo_vaga": "Estagiário de TI",
+      "competencias_tecnicas_requeridas": "Noções básicas de informática, Excel",
+      "nivel_academico": "ensino médio",
+      "nivel_ingles": "básico",
+      "nivel_profissional": "estagiário",
+      "tipo_contratacao": "estágio",
+      "areas_atuacao": "Tecnologia"
+    },
+    "candidato": {
+      "conhecimentos_tecnicos": "Python, Java, React, Node.js, Docker, Kubernetes, AWS, DevOps, Machine Learning, TensorFlow",
+      "nivel_academico": "pós-graduação",
+      "nivel_ingles": "fluente",
+      "area_de_atuacao": "Arquitetura de Software"
+    }
+  }
+}

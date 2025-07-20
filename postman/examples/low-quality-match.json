@@ -1,0 +1,21 @@
+{
+  "description": "Cenário de baixa compatibilidade - Mismatch de tecnologias e área",
+  "expected_result": "Baixa qualidade (prediction: 0, quality_score < 50)",
+  "request_body": {
+    "vaga": {
+      "titulo_vaga": "Desenvolvedor Java Enterprise",
+      "competencias_tecnicas_requeridas": "Java, Spring Boot, Hibernate, Oracle, Maven, JSF",
+      "nivel_academico": "superior",
+      "nivel_ingles": "avançado",
+      "nivel_profissional": "sênior",
+      "tipo_contratacao": "clt",
+      "areas_atuacao": "Tecnologia"
+    },
+    "candidato": {
+      "conhecimentos_tecnicos": "Photoshop, Illustrator, InDesign, Figma, Sketch",
+      "nivel_academico": "técnico",
+      "nivel_ingles": "básico",
+      "area_de_atuacao": "Design Gráfico"
+    }
+  }
+}

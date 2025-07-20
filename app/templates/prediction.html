@@ -36,9 +36,6 @@
     <nav class="navbar navbar-dark bg-primary">
         <div class="container">
             <span class="navbar-brand mb-0 h1">🎯 Otimizador de Entrevistas</span>
-            <div class="navbar-nav">
-                <a class="nav-link" href="/status">Status</a>
-            </div>
         </div>
     </nav>
 
@@ -176,8 +173,8 @@
                             </div>
                             
                             <div class="d-grid">
-                                <button type="submit" id="submitButton" class="btn btn-primary btn-lg">
-                                    <span class="spinner-border spinner-border-sm me-2 loading" role="status" style="display: none;"></span>
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <span class="spinner-border spinner-border-sm me-2 loading" role="status"></span>
                                     🎯 Analisar Compatibilidade
                                 </button>
                             </div>
@@ -213,154 +210,99 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Verificar se o DOM está carregado
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, setting up form listener...');
+        document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
             
-            var form = document.getElementById('predictionForm');
-            if (!form) {
-                console.error('Form not found!');
-                return;
-            }
+            // Mostrar loading
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const loading = submitBtn.querySelector('.loading');
+            loading.style.display = 'inline-block';
+            submitBtn.disabled = true;
             
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                console.log('Form submitted!');
-                
-                // Tentar encontrar o botão de várias formas
-                var submitBtn = form.querySelector('button[type="submit"]') || 
-                               document.querySelector('button[type="submit"]') ||
-                               document.getElementById('submitButton');
-                
-                console.log('Submit button found:', submitBtn);
-                
-                if (!submitBtn) {
-                    console.error('Submit button not found! Continuing without loading animation...');
-                }
-                
-                var loading = null;
-                if (submitBtn) {
-                    loading = submitBtn.querySelector('.loading');
-                    if (loading) {
-                        loading.style.display = 'inline-block';
-                    }
-                    submitBtn.disabled = true;
-                }
-                
-                // Coletar dados do formulário
-                var formData = new FormData(form);
-                var data = {
-                    vaga: {
-                        titulo_vaga: formData.get('titulo_vaga') || '',
-                        competencias_tecnicas_requeridas: formData.get('competencias_tecnicas') || '',
-                        nivel_academico: formData.get('nivel_academico') || '',
-                        nivel_ingles: formData.get('nivel_ingles') || '',
-                        nivel_profissional: formData.get('nivel_profissional') || '',
-                        tipo_contratacao: formData.get('tipo_contratacao') || '',
-                        areas_atuacao: formData.get('areas_atuacao') || ''
+            // Coletar dados do formulário
+            const formData = new FormData(e.target);
+            const vaga = {
+                titulo_vaga: formData.get('titulo_vaga'),
+                competencias_tecnicas_requeridas: formData.get('competencias_tecnicas'),
+                nivel_academico: formData.get('nivel_academico'),
+                nivel_ingles: formData.get('nivel_ingles'),
+                nivel_profissional: formData.get('nivel_profissional'),
+                tipo_contratacao: formData.get('tipo_contratacao'),
+                areas_atuacao: formData.get('areas_atuacao')
+            };
+            
+            const candidato = {
+                conhecimentos_tecnicos: formData.get('conhecimentos_tecnicos'),
+                nivel_academico: formData.get('nivel_academico_candidato'),
+                nivel_ingles: formData.get('nivel_ingles_candidato'),
+                area_de_atuacao: formData.get('area_atuacao_candidato')
+            };
+            
+            try {
+                const response = await fetch('/api/predict_simple', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
                     },
-                    candidato: {
-                        conhecimentos_tecnicos: formData.get('conhecimentos_tecnicos') || '',
-                        nivel_academico: formData.get('nivel_academico_candidato') || '',
-                        nivel_ingles: formData.get('nivel_ingles_candidato') || '',
-                        area_de_atuacao: formData.get('area_atuacao_candidato') || ''
-                    }
-                };
+                    body: JSON.stringify({ vaga, candidato })
+                });
                 
-                console.log('Data to send:', data);
+                const result = await response.json();
                 
-                // Fazer requisição
-                var xhr = new XMLHttpRequest();
-                xhr.open('POST', '/api/predict', true);
-                xhr.setRequestHeader('Content-Type', 'application/json');
-                
-                xhr.onreadystatechange = function() {
-                    if (xhr.readyState === 4) {
-                        // Esconder loading
-                        if (loading) {
-                            loading.style.display = 'none';
-                        }
-                        if (submitBtn) {
-                            submitBtn.disabled = false;
-                        }
-                        
-                        if (xhr.status === 200) {
-                            try {
-                                var result = JSON.parse(xhr.responseText);
-                                console.log('API Response:', result);
-                                displayResult(result);
-                            } catch (e) {
-                                console.error('Parse error:', e);
-                                alert('Erro ao processar resposta do servidor');
-                            }
-                        } else {
-                            console.error('HTTP Error:', xhr.status, xhr.responseText);
-                            alert('Erro na comunicação: ' + xhr.status);
-                        }
-                    }
-                };
-                
-                xhr.onerror = function() {
-                    console.error('Network error');
-                    if (loading) {
-                        loading.style.display = 'none';
-                    }
-                    if (submitBtn) {
-                        submitBtn.disabled = false;
-                    }
-                    alert('Erro de conexão');
-                };
-                
-                xhr.send(JSON.stringify(data));
-            });
+                if (response.ok) {
+                    displayResult(result);
+                } else {
+                    alert('Erro: ' + result.error);
+                }
+            } catch (error) {
+                alert('Erro na comunicação: ' + error.message);
+            } finally {
+                // Esconder loading
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+            }
         });
         
         function displayResult(result) {
-            console.log('Displaying result:', result);
-            
-            var resultSection = document.getElementById('resultSection');
-            var resultCard = document.getElementById('resultCard');
-            var percentageDisplay = document.getElementById('percentageDisplay');
-            var qualityText = document.getElementById('qualityText');
-            var analysisDetails = document.getElementById('analysisDetails');
-            
-            if (!resultSection) {
-                console.error('resultSection not found!');
-                alert('Erro: Seção de resultado não encontrada');
-                return;
-            }
+            const resultSection = document.getElementById('resultSection');
+            const resultCard = document.getElementById('resultCard');
+            const percentageDisplay = document.getElementById('percentageDisplay');
+            const qualityText = document.getElementById('qualityText');
+            const analysisDetails = document.getElementById('analysisDetails');
             
             // Mostrar seção de resultado
             resultSection.style.display = 'block';
             
             // Configurar cor do card
-            var isHighQuality = result.prediction === 1;
-            if (resultCard) {
-                resultCard.className = 'card result-card ' + (isHighQuality ? 'high-quality' : 'low-quality');
-            }
+            const isHighQuality = result.prediction === 1;
+            resultCard.className = `card result-card ${isHighQuality ? 'high-quality' : 'low-quality'}`;
             
             // Mostrar porcentagem
-            if (percentageDisplay) {
-                percentageDisplay.textContent = result.percentage || '0%';
-            }
-            if (qualityText) {
-                qualityText.textContent = result.prediction_text || 'Resultado';
-            }
+            percentageDisplay.textContent = result.percentage;
+            qualityText.textContent = result.prediction_text;
             
             // Mostrar análise detalhada
-            if (analysisDetails && result.analysis) {
-                var analysis = result.analysis;
-                analysisDetails.innerHTML = 
-                    '<div class="analysis-item"><strong>💻 Compatibilidade Técnica:</strong> ' + (analysis.tech_compatibility || 'N/A') + '</div>' +
-                    '<div class="analysis-item"><strong>🎓 Compatibilidade Acadêmica:</strong> ' + (analysis.academic_compatibility || 'N/A') + '</div>' +
-                    '<div class="analysis-item"><strong>🌐 Compatibilidade de Inglês:</strong> ' + (analysis.english_compatibility || 'N/A') + '</div>' +
-                    '<div class="analysis-item"><strong>🏢 Área de Atuação:</strong> ' + (analysis.area_match || 'N/A') + '</div>' +
-                    '<div class="analysis-item"><strong>📋 Tipo de Contrato:</strong> ' + (analysis.contract_type || 'N/A') + '</div>';
-            }
+            const analysis = result.analysis;
+            analysisDetails.innerHTML = `
+                <div class="analysis-item">
+                    <strong>💻 Compatibilidade Técnica:</strong> ${analysis.tech_compatibility}
+                </div>
+                <div class="analysis-item">
+                    <strong>🎓 Compatibilidade Acadêmica:</strong> ${analysis.academic_compatibility}
+                </div>
+                <div class="analysis-item">
+                    <strong>🌐 Compatibilidade de Inglês:</strong> ${analysis.english_compatibility}
+                </div>
+                <div class="analysis-item">
+                    <strong>🏢 Área de Atuação:</strong> ${analysis.area_match}
+                </div>
+                <div class="analysis-item">
+                    <strong>📋 Tipo de Contrato:</strong> ${analysis.contract_type}
+                </div>
+            `;
             
             // Scroll para o resultado
             resultSection.scrollIntoView({ behavior: 'smooth' });
-            console.log('Result displayed successfully!');
         }
     </script>
 </body>

@@ -212,3 +212,10 @@ grafana/data/
 
 # Prometheus data
 prometheus/data/
+# Cache directories
+__pycache__/
+.pytest_cache/
+
+# Virtual environment
+.venv/
+venv/

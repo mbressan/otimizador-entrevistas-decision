@@ -629,7 +629,7 @@
             "type": "prometheus",
             "uid": "prometheus_uid"
           },
-          "expr": "increase(flask_http_request_total{endpoint=\"/api/predict\"}[1h])",
+          "expr": "increase(flask_http_request_total{method=\"POST\",status=\"200\"}[1h])",
           "interval": "",
           "legendFormat": "Predições na última hora",
           "refId": "A"
@@ -637,6 +637,111 @@
       ],
       "title": "Predições de ML (última hora)",
       "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus_uid"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            }
+          },
+          "mappings": [],
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Alta Qualidade"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Baixa Qualidade"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 27
+      },
+      "id": 11,
+      "options": {
+        "displayLabels": [],
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus_uid"
+          },
+          "expr": "hired_model_predictions_total{quality_level=\"high\"}",
+          "interval": "",
+          "legendFormat": "Alta Qualidade",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus_uid"
+          },
+          "expr": "hired_model_predictions_total{quality_level=\"low\"}",
+          "interval": "",
+          "legendFormat": "Baixa Qualidade",
+          "refId": "B"
+        }
+      ],
+      "title": "Predições por Qualidade",
+      "type": "piechart"
     },
     {
       "datasource": {
@@ -700,8 +805,8 @@
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 12,
-        "y": 27
+        "x": 0,
+        "y": 35
       },
       "id": 11,
       "options": {
@@ -722,7 +827,7 @@
             "type": "prometheus",
             "uid": "prometheus_uid"
           },
-          "expr": "histogram_quantile(0.50, rate(flask_http_request_duration_seconds_bucket{endpoint=\"/api/predict\"}[5m])) * 1000",
+          "expr": "histogram_quantile(0.50, rate(flask_http_request_duration_seconds_bucket{method=\"POST\",path=\"/api/predict\"}[5m])) * 1000",
           "interval": "",
           "legendFormat": "50th percentile",
           "refId": "A"
@@ -732,7 +837,7 @@
             "type": "prometheus",
             "uid": "prometheus_uid"
           },
-          "expr": "histogram_quantile(0.95, rate(flask_http_request_duration_seconds_bucket{endpoint=\"/api/predict\"}[5m])) * 1000",
+          "expr": "histogram_quantile(0.95, rate(flask_http_request_duration_seconds_bucket{method=\"POST\",path=\"/api/predict\"}[5m])) * 1000",
           "interval": "",
           "legendFormat": "95th percentile",
           "refId": "B"
@@ -742,13 +847,116 @@
             "type": "prometheus",
             "uid": "prometheus_uid"
           },
-          "expr": "histogram_quantile(0.99, rate(flask_http_request_duration_seconds_bucket{endpoint=\"/api/predict\"}[5m])) * 1000",
+          "expr": "histogram_quantile(0.99, rate(flask_http_request_duration_seconds_bucket{method=\"POST\",path=\"/api/predict\"}[5m])) * 1000",
           "interval": "",
           "legendFormat": "99th percentile",
           "refId": "C"
         }
       ],
       "title": "Tempo de Resposta das Predições ML",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus_uid"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 35
+      },
+      "id": 13,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus_uid"
+          },
+          "expr": "histogram_quantile(0.50, rate(hired_model_quality_scores_bucket[5m])) * 100",
+          "interval": "",
+          "legendFormat": "Mediana (50th percentile)",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus_uid"
+          },
+          "expr": "histogram_quantile(0.95, rate(hired_model_quality_scores_bucket[5m])) * 100",
+          "interval": "",
+          "legendFormat": "95th percentile",
+          "refId": "B"
+        }
+      ],
+      "title": "Distribuição dos Scores de Qualidade ML",
       "type": "timeseries"
     }
   ],

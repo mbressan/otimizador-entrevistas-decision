@@ -218,6 +218,49 @@ def predict():
             # Preparar features automaticamente
             features_data = prepare_hired_candidates_features(vaga_data, candidato_data)
             
+            # Fazer predição
+            prediction = pipeline_model.predict(features_data)[0]
+            probability = pipeline_model.predict_proba(features_data)[0]
+            
+            # Extrair features calculadas
+            features = features_data.iloc[0].to_dict()
+            
+            # Métricas de monitoramento
+            quality_level = 'high' if prediction == 1 else 'low'
+            hired_model_predictions.labels(
+                prediction_type='unified_interface',
+                quality_level=quality_level
+            ).inc()
+            
+            quality_score = float(probability[1]) if len(probability) > 1 else 0.5
+            quality_scores.observe(quality_score)
+            
+            # Resposta detalhada para interface web
+            result = {
+                'prediction': int(prediction),
+                'prediction_text': 'ALTA QUALIDADE' if prediction == 1 else 'BAIXA QUALIDADE',
+                'probability': {
+                    'low_quality': float(probability[0]),
+                    'high_quality': float(probability[1]) if len(probability) > 1 else 0.0
+                },
+                'quality_score': float(probability[1] * 100) if len(probability) > 1 else 50.0,
+                'percentage': f"{probability[1] * 100:.1f}%" if len(probability) > 1 else "50.0%",
+                'model_type': 'hired_candidates_unified',
+                'match_score': float(probability[1] * 100) if len(probability) > 1 else 50.0,
+                'explanation': {
+                    'tech_compatibility': f"{features['tech_success_score']*100:.1f}%",
+                    'academic_compatibility': f"{features['academic_success_score']*100:.1f}%",
+                    'english_compatibility': f"{features['english_success_score']*100:.1f}%"
+                },
+                'analysis': {
+                    'tech_compatibility': f"{features['tech_success_score']*100:.1f}%",
+                    'academic_compatibility': f"{features['academic_success_score']*100:.1f}%", 
+                    'english_compatibility': f"{features['english_success_score']*100:.1f}%",
+                    'area_match': 'Área de TI' if features['is_tech_area'] else 'Outra área',
+                    'contract_type': 'CLT' if features['is_clt'] else ('PJ' if features['is_pj'] else 'Outros')
+                }
+            }
+            
         else:
             # Formato de features diretas (compatibilidade com versão anterior)
             required_fields = ['tech_match_score', 'nivel_profissional', 'areas_atuacao', 
@@ -230,97 +273,41 @@ def predict():
             
             # Preparar dados para predição
             features_data = pd.DataFrame([data])
-        
-        # Fazer predição
-        prediction = pipeline_model.predict(features_data)[0]
-        probability = pipeline_model.predict_proba(features_data)[0]
-        
-        # Extrair features se usou prepare_hired_candidates_features
-        if 'vaga' in data and 'candidato' in data:
-            features = features_data.iloc[0].to_dict()
-            tech_score = features.get('tech_success_score', 0.5)
-            academic_score = features.get('academic_success_score', 0.5)
-            english_score = features.get('english_success_score', 0.5)
-        else:
+            
+            # Fazer predição
+            prediction = pipeline_model.predict(features_data)[0]
+            probability = pipeline_model.predict_proba(features_data)[0]
+            
+            # Métricas de monitoramento
+            quality_level = 'high' if prediction == 1 else 'low'
+            hired_model_predictions.labels(
+                prediction_type='api_direct',
+                quality_level=quality_level
+            ).inc()
+            
+            quality_score = float(probability[1]) if len(probability) > 1 else 0.5
+            quality_scores.observe(quality_score)
+            
+            # Extrair features se usou prepare_hired_candidates_features
             tech_score = data.get('tech_match_score', 0.5)
             academic_score = 0.5  # Não disponível no formato antigo
             english_score = 0.5   # Não disponível no formato antigo
-        
-        result = {
-            'prediction': int(prediction),
-            'prediction_text': 'CONTRATADO' if prediction == 1 else 'NÃO CONTRATADO',
-            'probability': {
-                'not_hired': float(probability[0]),
-                'hired': float(probability[1]) if len(probability) > 1 else 0.0
-            },
-            'match_score': float(probability[1] * 100) if len(probability) > 1 else 50.0,
-            'model_type': 'hired_candidates',
-            'explanation': {
-                'tech_compatibility': f"{tech_score*100:.1f}%",
-                'academic_compatibility': f"{academic_score*100:.1f}%",
-                'english_compatibility': f"{english_score*100:.1f}%"
+            
+            result = {
+                'prediction': int(prediction),
+                'prediction_text': 'CONTRATADO' if prediction == 1 else 'NÃO CONTRATADO',
+                'probability': {
+                    'not_hired': float(probability[0]),
+                    'hired': float(probability[1]) if len(probability) > 1 else 0.0
+                },
+                'match_score': float(probability[1] * 100) if len(probability) > 1 else 50.0,
+                'model_type': 'hired_candidates',
+                'explanation': {
+                    'tech_compatibility': f"{tech_score*100:.1f}%",
+                    'academic_compatibility': f"{academic_score*100:.1f}%",
+                    'english_compatibility': f"{english_score*100:.1f}%"
+                }
             }
-        }
-        
-        return jsonify(result)
-        
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/predict_simple', methods=['POST'])
-def predict_simple():
-    """Endpoint simplificado para predições com dados da vaga e candidato"""
-    try:
-        if pipeline_model is None:
-            return jsonify({'error': 'Modelo não carregado'}), 500
-        
-        data = request.get_json()
-        
-        # Validar se temos dados da vaga e candidato
-        vaga_data = data.get('vaga', {})
-        candidato_data = data.get('candidato', {})
-        
-        if not vaga_data or not candidato_data:
-            return jsonify({'error': 'Dados da vaga e candidato são obrigatórios'}), 400
-        
-        # Preparar features automaticamente
-        features_data = prepare_hired_candidates_features(vaga_data, candidato_data)
-        
-        # Fazer predição
-        prediction = pipeline_model.predict(features_data)[0]
-        probability = pipeline_model.predict_proba(features_data)[0]
-        
-        # Extrair features calculadas
-        features = features_data.iloc[0].to_dict()
-        
-        # Métricas de monitoramento
-        quality_level = 'high' if prediction == 1 else 'low'
-        hired_model_predictions.labels(
-            prediction_type='simple_interface',
-            quality_level=quality_level
-        ).inc()
-        
-        quality_score = float(probability[1]) if len(probability) > 1 else 0.5
-        quality_scores.observe(quality_score)
-        
-        result = {
-            'prediction': int(prediction),
-            'prediction_text': 'ALTA QUALIDADE' if prediction == 1 else 'BAIXA QUALIDADE',
-            'probability': {
-                'low_quality': float(probability[0]),
-                'high_quality': float(probability[1]) if len(probability) > 1 else 0.0
-            },
-            'quality_score': float(probability[1] * 100) if len(probability) > 1 else 50.0,
-            'percentage': f"{probability[1] * 100:.1f}%" if len(probability) > 1 else "50.0%",
-            'model_type': 'hired_candidates_simple',
-            'analysis': {
-                'tech_compatibility': f"{features['tech_success_score']*100:.1f}%",
-                'academic_compatibility': f"{features['academic_success_score']*100:.1f}%", 
-                'english_compatibility': f"{features['english_success_score']*100:.1f}%",
-                'area_match': 'Área de TI' if features['is_tech_area'] else 'Outra área',
-                'contract_type': 'CLT' if features['is_clt'] else ('PJ' if features['is_pj'] else 'Outros')
-            }
-        }
         
         return jsonify(result)
         

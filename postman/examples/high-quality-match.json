@@ -1,0 +1,21 @@
+{
+  "description": "Cenário de alta compatibilidade - Desenvolvedor Python Sênior",
+  "expected_result": "Alta qualidade (prediction: 1, quality_score > 70)",
+  "request_body": {
+    "vaga": {
+      "titulo_vaga": "Desenvolvedor Python Sênior",
+      "competencias_tecnicas_requeridas": "Python, Django, PostgreSQL, Docker, AWS, Git",
+      "nivel_academico": "superior",
+      "nivel_ingles": "intermediário",
+      "nivel_profissional": "sênior",
+      "tipo_contratacao": "clt",
+      "areas_atuacao": "Tecnologia"
+    },
+    "candidato": {
+      "conhecimentos_tecnicos": "Python, Django, PostgreSQL, Docker, AWS, Git, Flask, Redis",
+      "nivel_academico": "superior",
+      "nivel_ingles": "avançado",
+      "area_de_atuacao": "Desenvolvimento de Software"
+    }
+  }
+}

@@ -1,26 +1,4 @@
-version: '3.8'
-
 services:
-  postgresql:
-    image: postgres:15-alpine
-    container_name: otimizador_postgres
-    environment:
-      POSTGRES_DB: otimizador_entrevistas
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - monitoring
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d otimizador_entrevistas"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-
   app:
     build: 
       context: ./app
@@ -30,17 +8,10 @@ services:
     environment:
       - FLASK_ENV=production
       - DEBUG=false
-      - DB_HOST=postgresql
-      - DB_NAME=otimizador_entrevistas
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
-      - DB_PORT=5432
     volumes:
       - ./app/models:/app/models:ro
       - ./data:/app/data:ro
     depends_on:
-      postgresql:
-        condition: service_healthy
       prometheus:
         condition: service_started
     networks:
@@ -73,17 +44,18 @@ services:
 
   grafana:
     image: grafana/grafana:latest
+    container_name: otimizador_grafana
+    user: "0"
     ports:
       - "3000:3000"
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin123
       - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
-      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/var/lib/grafana/dashboards/main-dashboard.json
+      - GF_PROVISIONING_PATH=/etc/grafana/provisioning
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
-      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - ./grafana/dashboards:/etc/grafana/dashboards:ro
     depends_on:
       - prometheus
     networks:
@@ -102,10 +74,44 @@ services:
       - monitoring
     restart: unless-stopped
 
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: otimizador_node_exporter
+    user: root
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    ports:
+      - "9100:9100"
+    networks:
+      - monitoring
+    restart: unless-stopped
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: otimizador_cadvisor
+    privileged: true
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - "8080:8080"
+    networks:
+      - monitoring
+    restart: unless-stopped
+
 volumes:
   prometheus_data:
   grafana_data:
-  postgres_data:
 
 networks:
   monitoring:

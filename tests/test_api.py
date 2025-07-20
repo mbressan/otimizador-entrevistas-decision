@@ -97,19 +97,6 @@ class TestFlaskRoutes:
         assert response.status_code == 200
         assert b"Status do Sistema" in response.data
 
-    def test_predict_simple_api_success(self, client, sample_vaga, sample_candidate):
-        """Testa o endpoint /api/predict_simple com dados válidos."""
-        payload = {"vaga": sample_vaga, "candidato": sample_candidate}
-        response = client.post('/api/predict_simple', json=payload)
-        
-        assert response.status_code == 200
-        data = response.get_json()
-        assert 'prediction' in data
-        assert 'prediction_text' in data
-        assert 'quality_score' in data
-        assert 'analysis' in data
-        assert 'tech_compatibility' in data['analysis']
-
     def test_predict_api_success(self, client, sample_vaga, sample_candidate):
         """Testa o endpoint /api/predict com dados válidos."""
         payload = {"vaga": sample_vaga, "candidato": sample_candidate}
@@ -119,17 +106,17 @@ class TestFlaskRoutes:
         data = response.get_json()
         assert 'prediction' in data
         assert 'prediction_text' in data
-        assert 'match_score' in data
-        assert 'explanation' in data
-        assert 'tech_compatibility' in data['explanation']
+        assert 'quality_score' in data
+        assert 'analysis' in data
+        assert 'tech_compatibility' in data['analysis']
 
     def test_predict_api_missing_data(self, client):
         """Testa a API de predição com dados faltando."""
-        response = client.post('/api/predict_simple', json={"vaga": {}})
+        response = client.post('/api/predict', json={"vaga": {}})
         assert response.status_code == 400
         data = response.get_json()
         assert 'error' in data
-        assert data['error'] == 'Dados da vaga e candidato são obrigatórios'
+        assert 'Campos obrigatórios' in data['error'] or 'Dados da vaga e candidato são obrigatórios' in data['error']
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

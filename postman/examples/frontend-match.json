@@ -1,0 +1,21 @@
+{
+  "description": "Cenário Frontend - Boa compatibilidade para desenvolvedor frontend",
+  "expected_result": "Qualidade média-alta (prediction: 1, quality_score 60-80)",
+  "request_body": {
+    "vaga": {
+      "titulo_vaga": "Desenvolvedor Frontend React",
+      "competencias_tecnicas_requeridas": "React, JavaScript, TypeScript, CSS, HTML, Redux, Webpack",
+      "nivel_academico": "superior",
+      "nivel_ingles": "intermediário",
+      "nivel_profissional": "pleno",
+      "tipo_contratacao": "pj",
+      "areas_atuacao": "Tecnologia"
+    },
+    "candidato": {
+      "conhecimentos_tecnicos": "React, JavaScript, TypeScript, CSS, HTML, Vue.js, Angular, SASS",
+      "nivel_academico": "superior",
+      "nivel_ingles": "intermediário",
+      "area_de_atuacao": "Desenvolvimento Frontend"
+    }
+  }
+}

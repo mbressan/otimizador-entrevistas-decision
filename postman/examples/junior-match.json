@@ -1,0 +1,21 @@
+{
+  "description": "Cenário Junior - Candidato júnior para vaga júnior",
+  "expected_result": "Qualidade média (prediction variável, quality_score 50-70)",
+  "request_body": {
+    "vaga": {
+      "titulo_vaga": "Desenvolvedor Python Júnior",
+      "competencias_tecnicas_requeridas": "Python, Flask, HTML, CSS, JavaScript, Git",
+      "nivel_academico": "superior",
+      "nivel_ingles": "básico",
+      "nivel_profissional": "júnior",
+      "tipo_contratacao": "clt",
+      "areas_atuacao": "Tecnologia"
+    },
+    "candidato": {
+      "conhecimentos_tecnicos": "Python, Flask, HTML, CSS, JavaScript, MySQL",
+      "nivel_academico": "superior",
+      "nivel_ingles": "básico",
+      "area_de_atuacao": "Desenvolvimento Web"
+    }
+  }
+}
