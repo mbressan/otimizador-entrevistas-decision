@@ -193,9 +193,37 @@ def health():
     status = {
         'status': 'healthy',
         'model_type': 'hired_candidates',
-        'model_loaded': pipeline_model is not None
+        'model_loaded': pipeline_model is not None,
+        'vagas_loaded': True,  # JSON sempre carregado
+        'candidates_loaded': True  # JSON sempre carregado
     }
     return jsonify(status)
+
+@app.route('/model/info')
+def model_info():
+    """Endpoint com informações detalhadas do modelo"""
+    if pipeline_model is None:
+        return jsonify({
+            'error': 'Modelo não carregado',
+            'model_type': None,
+            'metadata': None
+        }), 503
+    
+    # Tentar carregar metadados
+    metadata = {}
+    try:
+        metadata_path = os.path.join(BASE_DIR, 'models', 'model_metadata_enhanced.json')
+        if os.path.exists(metadata_path):
+            with open(metadata_path, 'r', encoding='utf-8') as f:
+                metadata = json.load(f)
+    except Exception as e:
+        print(f"⚠️ Não foi possível carregar metadados: {e}")
+    
+    return jsonify({
+        'model_type': 'RandomForestClassifier_CandidatosContratados',
+        'loaded': True,
+        'metadata': metadata
+    })
 
 @app.route('/api/predict', methods=['POST'])
 def predict():
@@ -314,8 +342,13 @@ def predict():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# Carregar recursos na inicialização do módulo
-load_resources()
+# Carregar recursos na inicialização do módulo (com try/catch)
+try:
+    load_resources()
+except Exception as e:
+    print(f"⚠️ Erro ao carregar recursos na inicialização: {e}")
+    print("🔄 Aplicação continuará, mas modelo pode não estar disponível")
 
 if __name__ == '__main__':
+    print("🚀 Iniciando servidor Flask...")
     app.run(debug=True, host='0.0.0.0', port=5000)
