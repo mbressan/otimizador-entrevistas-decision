@@ -454,7 +454,7 @@ otimizador-entrevistas-decision/
 
 **Mateus Bressan**  
 Pós-graduando em Machine Learning Engineering - FIAP  
-📧 [email@exemplo.com]  
+📧 [mateusnh@gmail.com]  
 💼 [LinkedIn](https://linkedin.com/in/mateus-bressan)  
 🐙 [GitHub](https://github.com/mbressan)  
 
