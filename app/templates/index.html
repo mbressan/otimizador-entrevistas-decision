@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Otimizador de Entrevistas - Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 0;
+        }
+        .card {
+            transition: transform 0.2s ease-in-out;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+        .vaga-card {
+            margin-bottom: 20px;
+        }
+        .nivel-badge {
+            font-size: 0.8rem;
+        }
+        .stats-card {
+            background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 15px;
+        }
+        .pagination .page-link {
+            border-radius: 50px;
+            margin: 0 2px;
+            border: none;
+            color: #667eea;
+        }
+        .pagination .page-item.active .page-link {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+        .pagination .page-link:hover {
+            background-color: #f8f9fa;
+            color: #495057;
+        }
+        .search-section {
+            background-color: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-users-cog me-2"></i>
+                Otimizador de Entrevistas
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('index') }}">
+                            <i class="fas fa-home me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('status_page') }}">
+                            <i class="fas fa-heartbeat me-1"></i>Status
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h1 class="display-4 fw-bold mb-4">
+                        <i class="fas fa-brain me-3"></i>
+                        Otimização de Entrevistas com IA
+                    </h1>
+                    <p class="lead mb-4">
+                        Sistema inteligente para identificar os candidatos mais compatíveis com suas vagas, 
+                        utilizando Machine Learning para otimizar o processo de recrutamento.
+                    </p>
+                </div>
+                <div class="col-lg-4 text-center">
+                    <div class="stats-card p-4">
+                        <h3 class="fw-bold">{{ pagination.total_vagas if pagination else vagas|length }}</h3>
+                        <p class="mb-1">Vagas com Prospects</p>
+                        {% if pagination %}
+                        <small class="opacity-75">Página {{ pagination.current_page }} de {{ pagination.total_pages }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container my-5">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold">
+                        <i class="fas fa-briefcase me-2 text-primary"></i>
+                        Vagas com Prospects
+                        {% if pagination %}
+                        <small class="text-muted">({{ pagination.total_vagas }} encontradas)</small>
+                        {% endif %}
+                    </h2>
+                </div>
+                
+                <!-- Filtros de Busca -->
+                <div class="search-section">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <form method="GET" id="searchForm">
+                                <div class="input-group">
+                                    <input type="text" name="search" id="searchInput" class="form-control" 
+                                           placeholder="Buscar por título, cliente ou área..." 
+                                           value="{{ search if search else '' }}">
+                                    <button class="btn btn-primary" type="submit">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-3">
+                            <form method="GET" id="filterForm">
+                                <input type="hidden" name="search" value="{{ search if search else '' }}">
+                                <select name="nivel" id="filterNivel" class="form-select">
+                                    <option value="">Todos os níveis</option>
+                                    {% for nivel in niveis_disponiveis %}
+                                    <option value="{{ nivel }}" {% if nivel_filter == nivel %}selected{% endif %}>
+                                        {{ nivel|title }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </form>
+                        </div>
+                        <div class="col-md-3">
+                            {% if search or nivel_filter %}
+                            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary w-100">
+                                <i class="fas fa-times me-2"></i>Limpar Filtros
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vagas Grid -->
+                <div class="row" id="vagasContainer">
+                    {% for vaga in vagas %}
+                    <div class="col-lg-6 col-xl-4 vaga-item" 
+                         data-titulo="{{ vaga.titulo_vaga|lower }}" 
+                         data-cliente="{{ vaga.cliente|lower }}"
+                         data-nivel="{{ vaga.nivel_profissional|lower }}">
+                        <div class="card vaga-card h-100">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-laptop-code me-2"></i>
+                                    {{ vaga.titulo_vaga[:50] }}{% if vaga.titulo_vaga|length > 50 %}...{% endif %}
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <span class="badge bg-info nivel-badge">
+                                        <i class="fas fa-layer-group me-1"></i>
+                                        {{ vaga.nivel_profissional or 'Não informado' }}
+                                    </span>
+                                    {% if vaga.cidade %}
+                                    <span class="badge bg-secondary nivel-badge ms-2">
+                                        <i class="fas fa-map-marker-alt me-1"></i>
+                                        {{ vaga.cidade }}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <small class="text-muted">
+                                        <i class="fas fa-building me-1"></i>
+                                        <strong>Cliente:</strong> {{ vaga.cliente[:40] }}{% if vaga.cliente|length > 40 %}...{% endif %}
+                                    </small>
+                                </div>
+                                
+                                {% if vaga.areas_atuacao %}
+                                <div class="mb-3">
+                                    <small class="text-muted">
+                                        <i class="fas fa-tags me-1"></i>
+                                        <strong>Área:</strong> {{ vaga.areas_atuacao[:50] }}{% if vaga.areas_atuacao|length > 50 %}...{% endif %}
+                                    </small>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="card-footer bg-light">
+                                <a href="{{ url_for('vaga_detalhes', id_vaga=vaga.id_vaga) }}" 
+                                   class="btn btn-primary btn-sm w-100">
+                                    <i class="fas fa-search me-2"></i>
+                                    Ver Candidatos Compatíveis
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Paginação -->
+                {% if pagination and pagination.total_pages > 1 %}
+                <nav aria-label="Navegação de páginas" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <!-- Primeira página -->
+                        {% if pagination.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('index', page=1, search=search, nivel=nivel_filter) }}">
+                                <i class="fas fa-angle-double-left"></i>
+                            </a>
+                        </li>
+                        <!-- Página anterior -->
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('index', page=pagination.prev_page, search=search, nivel=nivel_filter) }}">
+                                <i class="fas fa-angle-left"></i>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link"><i class="fas fa-angle-double-left"></i></span>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link"><i class="fas fa-angle-left"></i></span>
+                        </li>
+                        {% endif %}
+
+                        <!-- Números das páginas -->
+                        {% for page_num in pagination.pages %}
+                        {% if page_num == pagination.current_page %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_num }}</span>
+                        </li>
+                        {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('index', page=page_num, search=search, nivel=nivel_filter) }}">
+                                {{ page_num }}
+                            </a>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+
+                        <!-- Próxima página -->
+                        {% if pagination.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('index', page=pagination.next_page, search=search, nivel=nivel_filter) }}">
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                        </li>
+                        <!-- Última página -->
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('index', page=pagination.total_pages, search=search, nivel=nivel_filter) }}">
+                                <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link"><i class="fas fa-angle-right"></i></span>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link"><i class="fas fa-angle-double-right"></i></span>
+                        </li>
+                        {% endif %}
+                    </ul>
+                    
+                    <!-- Informações de paginação -->
+                    <div class="text-center mt-3">
+                        <small class="text-muted">
+                            Mostrando {{ ((pagination.current_page - 1) * pagination.per_page + 1) }} 
+                            a {{ (pagination.current_page * pagination.per_page) if (pagination.current_page * pagination.per_page) <= pagination.total_vagas else pagination.total_vagas }} 
+                            de {{ pagination.total_vagas }} vagas
+                        </small>
+                    </div>
+                </nav>
+                {% endif %}
+
+                {% if not vagas %}
+                <div class="text-center py-5">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">Nenhuma vaga encontrada</h4>
+                    <p class="text-muted">Não há vagas disponíveis no momento.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-users-cog me-2"></i>Otimizador de Entrevistas</h5>
+                    <p class="mb-0">Sistema inteligente de recrutamento com IA</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0">
+                        <i class="fas fa-code me-2"></i>
+                        Desenvolvido por Mateus Bressan
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Melhorar UX da busca
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('searchForm').submit();
+            }
+        });
+
+        // Auto-submit do filtro de nível
+        document.getElementById('filterNivel').addEventListener('change', function() {
+            document.getElementById('filterForm').submit();
+        });
+
+        // Smooth scroll para âncoras
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

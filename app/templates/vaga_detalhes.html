@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ vaga.titulo_vaga }} - Candidatos Compatíveis</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .vaga-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 0;
+        }
+        .match-score {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .score-excellent { color: #28a745; }
+        .score-good { color: #17a2b8; }
+        .score-average { color: #ffc107; }
+        .score-poor { color: #dc3545; }
+        
+        .candidate-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid #dee2e6;
+        }
+        .candidate-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .candidate-card.excellent { border-left-color: #28a745; }
+        .candidate-card.good { border-left-color: #17a2b8; }
+        .candidate-card.average { border-left-color: #ffc107; }
+        .candidate-card.poor { border-left-color: #dc3545; }
+        
+        .info-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-users-cog me-2"></i>
+                Otimizador de Entrevistas
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{{ url_for('status_page') }}">
+                    <i class="fas fa-heartbeat me-1"></i>Status
+                </a>
+                <a class="nav-link" href="{{ url_for('index') }}">
+                    <i class="fas fa-arrow-left me-1"></i>Voltar ao Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Vaga Header -->
+    <section class="vaga-header">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <h1 class="display-5 fw-bold mb-3">
+                        <i class="fas fa-briefcase me-3"></i>
+                        {{ vaga.titulo_vaga }}
+                    </h1>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-2">
+                                <i class="fas fa-building me-2"></i>
+                                <strong>Cliente:</strong> {{ vaga.cliente }}
+                            </p>
+                            <p class="mb-2">
+                                <i class="fas fa-layer-group me-2"></i>
+                                <strong>Nível:</strong> {{ vaga.nivel_profissional or 'Não informado' }}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-2">
+                                <i class="fas fa-map-marker-alt me-2"></i>
+                                <strong>Localização:</strong> {{ vaga.cidade or 'Não informado' }}
+                            </p>
+                            <p class="mb-2">
+                                <i class="fas fa-handshake me-2"></i>
+                                <strong>Contratação:</strong> {{ vaga.tipo_contratacao or 'Não informado' }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container my-4">
+        <!-- Informações da Vaga -->
+        <div class="info-section">
+            <h3 class="fw-bold mb-3">
+                <i class="fas fa-info-circle me-2 text-primary"></i>
+                Informações da Vaga
+            </h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>ID da Vaga:</strong> {{ vaga.id_vaga }}</p>
+                    <p><strong>Área de Atuação:</strong> {{ vaga.areas_atuacao or 'Não informado' }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Total de Candidatos Analisados:</strong> {{ candidatos|length }}</p>
+                    <p><strong>Algoritmo:</strong> Random Forest com TF-IDF</p>
+                </div>
+            </div>
+            {% if vaga.competencias_tecnicas_requeridas %}
+            <div class="mt-3">
+                <h5><strong>Competências e Atividades:</strong></h5>
+                <div class="bg-white p-3 rounded border">
+                    <small>{{ vaga.competencias_tecnicas_requeridas }}</small>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Filtros e Estatísticas -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h2 class="fw-bold">
+                    <i class="fas fa-users me-2 text-primary"></i>
+                    Candidatos Compatíveis
+                </h2>
+                <p class="text-muted">Ordenados por score de compatibilidade (probabilidade de contratação)</p>
+            </div>
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" id="searchCandidates" class="form-control" placeholder="Buscar candidatos...">
+                </div>
+            </div>
+        </div>
+
+        <!-- Score Legend -->
+        <div class="alert alert-info">
+            <h6 class="fw-bold mb-2">
+                <i class="fas fa-chart-line me-2"></i>
+                Legenda dos Scores de Compatibilidade:
+            </h6>
+            <div class="row">
+                <div class="col-md-3">
+                    <span class="score-excellent">● 80-100%</span> Excelente
+                </div>
+                <div class="col-md-3">
+                    <span class="score-good">● 60-79%</span> Bom
+                </div>
+                <div class="col-md-3">
+                    <span class="score-average">● 40-59%</span> Regular
+                </div>
+                <div class="col-md-3">
+                    <span class="score-poor">● 0-39%</span> Baixo
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Candidatos -->
+        <div id="candidatesContainer">
+            {% for candidato in candidatos %}
+            {% set score_class = 'excellent' if candidato.match_score >= 80 else ('good' if candidato.match_score >= 60 else ('average' if candidato.match_score >= 40 else 'poor')) %}
+            <div class="card candidate-card {{ score_class }} mb-3" 
+                 data-nome="{{ candidato.nome|lower }}" 
+                 data-email="{{ candidato.email|lower }}"
+                 data-area="{{ candidato.area_de_atuacao|lower }}">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-1 text-center">
+                            <div class="fw-bold text-muted">
+                                #{{ loop.index }}
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <h5 class="card-title mb-1">
+                                <i class="fas fa-user me-2"></i>
+                                {{ candidato.nome }}
+                            </h5>
+                            <small class="text-muted">
+                                <i class="fas fa-hashtag me-1"></i>
+                                ID: {{ candidato.codigo_candidato }}
+                            </small>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-1">
+                                <i class="fas fa-envelope me-1 text-muted"></i>
+                                <small>{{ candidato.email or 'Não informado' }}</small>
+                            </div>
+                            <div>
+                                <i class="fas fa-phone me-1 text-muted"></i>
+                                <small>{{ candidato.telefone or 'Não informado' }}</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-1">
+                                <i class="fas fa-graduation-cap me-1 text-muted"></i>
+                                <small>{{ candidato.nivel_academico or 'Não informado' }}</small>
+                            </div>
+                            <div>
+                                <i class="fas fa-briefcase me-1 text-muted"></i>
+                                <small>{{ candidato.area_de_atuacao or 'Não informado' }}</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <div class="match-score score-{{ score_class }}">
+                                <i class="fas fa-chart-line me-1"></i>
+                                {{ "%.1f"|format(candidato.match_score) }}%
+                            </div>
+                            <small class="text-muted">Score</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if not candidatos %}
+        <div class="text-center py-5">
+            <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
+            <h4 class="text-muted">Nenhum candidato encontrado</h4>
+            <p class="text-muted">Não há candidatos compatíveis com esta vaga no momento.</p>
+        </div>
+        {% endif %}
+
+        <!-- Estatísticas -->
+        {% if candidatos %}
+        <div class="info-section mt-4">
+            <h4 class="fw-bold mb-3">
+                <i class="fas fa-chart-bar me-2 text-primary"></i>
+                Estatísticas dos Candidatos
+            </h4>
+            <div class="row">
+                <div class="col-md-3 text-center">
+                    <div class="bg-white p-3 rounded border">
+                        <h3 class="text-success">{{ candidatos|selectattr('match_score', '>=', 80)|list|length }}</h3>
+                        <small>Excelente Match</small>
+                    </div>
+                </div>
+                <div class="col-md-3 text-center">
+                    <div class="bg-white p-3 rounded border">
+                        <h3 class="text-info">{{ candidatos|selectattr('match_score', '>=', 60)|selectattr('match_score', '<', 80)|list|length }}</h3>
+                        <small>Bom Match</small>
+                    </div>
+                </div>
+                <div class="col-md-3 text-center">
+                    <div class="bg-white p-3 rounded border">
+                        <h3 class="text-warning">{{ candidatos|selectattr('match_score', '>=', 40)|selectattr('match_score', '<', 60)|list|length }}</h3>
+                        <small>Match Regular</small>
+                    </div>
+                </div>
+                <div class="col-md-3 text-center">
+                    <div class="bg-white p-3 rounded border">
+                        <h3 class="text-danger">{{ candidatos|selectattr('match_score', '<', 40)|list|length }}</h3>
+                        <small>Match Baixo</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-users-cog me-2"></i>Otimizador de Entrevistas</h5>
+                    <p class="mb-0">Sistema inteligente de recrutamento com IA</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0">
+                        <i class="fas fa-code me-2"></i>
+                        Desenvolvido por Mateus Bressan
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Busca de candidatos
+        document.getElementById('searchCandidates').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const candidateCards = document.querySelectorAll('.candidate-card');
+
+            candidateCards.forEach(card => {
+                const nome = card.dataset.nome;
+                const email = card.dataset.email;
+                const area = card.dataset.area;
+
+                if (nome.includes(searchTerm) || email.includes(searchTerm) || area.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        // Highlight do termo de busca
+        function highlightSearchTerm() {
+            // Implementação futura para destacar termos de busca
+        }
+    </script>
+</body>
+</html>

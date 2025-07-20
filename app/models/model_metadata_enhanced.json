@@ -1,0 +1,34 @@
+{
+  "model_version": "2.0_enhanced",
+  "features": {
+    "numeric": [
+      "tech_match_score"
+    ],
+    "categorical": [
+      "nivel_profissional",
+      "areas_atuacao",
+      "area_de_atuacao",
+      "academic_match",
+      "english_match"
+    ],
+    "text": [
+      "combined_text"
+    ]
+  },
+  "total_features_after_transform": 826,
+  "model_type": "RandomForestClassifier_Enhanced",
+  "training_date": "2025-07-19 22:16:35.924897",
+  "dataset_size": 45071,
+  "accuracy": 0.637283397306472,
+  "cross_validation_score": 0.5,
+  "class_distribution": {
+    "0": 42817,
+    "1": 2254
+  },
+  "feature_engineering": [
+    "tech_match_score: Score de compatibilidade técnica (0.0-1.0)",
+    "academic_match: Compatibilidade acadêmica (compatível/insuficiente/indefinido)",
+    "english_match: Compatibilidade de inglês (compatível/insuficiente/indefinido)",
+    "combined_text: Análise semântica de competências e atividades"
+  ]
+}
