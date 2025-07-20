@@ -24,7 +24,7 @@ Desenvolver uma solução de Machine Learning end-to-end que demonstre:
 
 ## 🎬 Demonstração
 
-**Vídeo de Apresentação**: [URL_DO_VIDEO_AQUI]
+**Vídeo de Apresentação**: [https://www.youtube.com/watch?v=C37Pm_4Ao3k]
 
 ## 📋 Índice
 
